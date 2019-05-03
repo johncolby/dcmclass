@@ -1,14 +1,18 @@
 # Script to train a model to identify modality (e.g FLAIR, T1, T1CE) based on 
 # DICOM header data
 
+# Input arguments:
+# dcm_dir - Path to training set, a directory of studies/series/dicoms.
+# gt_labels_path - Path to 'gt_labels.csv'
+
 source('functions.R')
 
 # Load hand-labeled series classification
-gt_labels = read_csv('gt_labels.csv', col_types = 'ciiii') %>%
+gt_labels = read_csv(gt_labels_path, col_types = 'ciiii') %>%
   gather(select=-AccessionNumber, key='class', value='SeriesNumber')
 
 # Construct training dataset
-tb = file.path('dcm', unique(gt_labels$AccessionNumber)) %>%
+tb = file.path(dcm_dir, unique(gt_labels$AccessionNumber)) %>%
   load_study_headers %>%
   {. ->> tb_tmp} %>%
   left_join(gt_labels, by=c('AccessionNumber', 'SeriesNumber')) %>%

@@ -1,7 +1,9 @@
+# Script to download a representative DICOM file from each series in a set of studies
+
 library(tidyverse)
 library(glue)
 
-# Inputs
+# Input arguments:
 # accs - char vector of accession numbers to download
 # cred_path - path to air_login.txt for air_download.py
 # air_url - URL for AIR API
