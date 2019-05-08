@@ -1,0 +1,27 @@
+Package: dcmclass
+Title: Tools for Identifying Imaging Modality Based on DICOM Header Data
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "John",
+           family = "Colby",
+           role = c("aut", "cre"),
+           email = "john.b.colby@gmail.com",
+           comment = c(ORCID = "0000-0001-8816-711X"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    oro.dicom,
+    dplyr,
+    tibble,
+    tidyr,
+    purrr,
+    readr,
+    stringr,
+    rlang,
+    tidytext,
+    tm,
+    caret,
+    glue
+RoxygenNote: 6.1.1
