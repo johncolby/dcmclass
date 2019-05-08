@@ -1,4 +1,4 @@
-# Classify series
+# `dcmclass`
 
 This is an R package for training and applying a machine learning classifier for the identification of series type (e.g. axial 3D T1, FLAIR, etc.), based on DICOM header data.
 
@@ -10,6 +10,12 @@ devtools::install_git('<git_repo_URL>')
 ```
 
 ## Usage
+
+Load R package
+
+```R
+library(dcmclass)
+```
 
 ### Import studies
 
