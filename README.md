@@ -4,10 +4,47 @@ This is an R package for training and applying a machine learning classifier for
 
 ## Installation
 
-```R
-install.packages('devtools')
-devtools::install_git('<git_repo_URL>')
-```
+1. Make sure the `devtools` R package is installed.
+
+    ```R
+    install.packages('devtools')
+    ```
+
+1. (optional) Install via local git repo.
+    At a shell prompt:
+
+    ```R
+    git clone <repo_URL>
+    ```
+    
+    Enter login/password when prompted. Then from within R:
+    
+    ```R
+    install_git('/path/to/repo')
+    ```
+
+1. (optional) Install via devtools with gitlab API token:
+    1. Login to gitlab and get a personal access token by navigating to Settings > Access Tokens.
+    1. Make the token available to R by adding it to your `.Renviron` file.
+    
+        ```bash
+        echo "GITLAB_PAT=<token>" > ~/.Renviron
+        ```
+    
+    1. Restart R and install.
+    
+        ```R
+        install_gitlab('jcolby/dcmclass', host='<hostname>')
+        ```
+
+1. (optional) Install via devtools with https:
+
+    ```R
+    install_git('<repo_URL>', git='external')
+    ```
+
+    Enter login/password when prompted.
+
 
 ## Usage
 
