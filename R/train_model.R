@@ -13,6 +13,13 @@
 
 train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata', 
   n_cv = 5, repeats = 5) {
+num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
+  'MagneticFieldStrength', 'SpacingBetweenSlices', 'FlipAngle',
+  'ImagesInAcquisition', 'Rows', 'Columns')
+fct_fields = c('CodeValue', 'MRAcquisitionType', 'ScanningSequence',
+  'StationName', 'VariableFlipAngleFlag')
+char_fields = c('SeriesDescription', 'ScanOptions')
+char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')
 
   # Load hand-labeled series classification
   gt_labels = readr::read_csv(gt_labels_path, col_types = 'ciiii') %>%
@@ -20,12 +27,16 @@ train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata',
 
   # Construct training dataset
   tb_tmp = file.path(dcm_dir, unique(gt_labels$AccessionNumber)) %>%
-    load_study_headers
+    load_study_headers(field_names=c(num_fields, fct_fields, char_fields))
   tb = tb_tmp %>%
     left_join(gt_labels, by=c('AccessionNumber', 'SeriesNumber')) %>%
     mutate(class = replace_na(class, replace='other'),
            class = as.factor(class))
-  tb_preproc = preprocess_headers(tb_tmp)
+  tb_preproc = preprocess_headers(tb_tmp,
+                                  num_fields     = num_fields,
+                                  fct_fields     = fct_fields,
+                                  char_fields    = char_fields,
+                                  char_splitters = char_splitters)
   train_data = data.frame(tb_preproc$tb_preproc)
 
   # Train models

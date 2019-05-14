@@ -4,14 +4,14 @@
 \alias{predict_headers}
 \title{Predict DICOM headers}
 \usage{
-predict_headers(acc_dir, models, tb_preproc)
+predict_headers(acc_dir, models, ref)
 }
 \arguments{
 \item{acc_dir}{String. Directory path to unknown study to be classified.}
 
 \item{models}{List. Pretrained model(s).}
 
-\item{tb_preproc}{Preprocessed training data.}
+\item{ref}{Reference preprocessed training data.}
 }
 \description{
 Function to predict series classification of a bunch of headers

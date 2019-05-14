@@ -4,11 +4,13 @@
 \alias{load_study_headers}
 \title{Load study headers}
 \usage{
-load_study_headers(acc_dirs)
+load_study_headers(acc_dirs, field_names)
 }
 \arguments{
-\item{acc_dirs}{Char vector. Directory paths, whose basenames should be 
+\item{acc_dirs}{Char vector. Directory paths, whose basenames should be
 accession numbers, and whose contents should be study directories.}
+
+\item{field_names}{Char vector. Set of DICOM header fields to extract.}
 }
 \description{
 Load representative headers from each series in a set of multiple studies

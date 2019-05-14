@@ -20,6 +20,6 @@ studies/series/dicoms.}
 \item{repeats}{Number of repeats for repeated cross validation.}
 }
 \description{
-Train a model to identify modality (e.g axial FLAIR, T1, T1CE) based on 
+Train a model to identify modality (e.g axial FLAIR, T1, T1CE) based on
 DICOM header data.
 }

@@ -4,10 +4,12 @@
 \alias{get_hdr}
 \title{Get DICOM header}
 \usage{
-get_hdr(path)
+get_hdr(path, field_names)
 }
 \arguments{
 \item{path}{String. Directory path to a study series (which should contain DICOM files).}
+
+\item{field_names}{Char vector. Set of DICOM header fields to extract.}
 }
 \description{
 Extract a single representative DICOM header from a given series.
