@@ -8,6 +8,7 @@ This is an R package for training and applying a machine learning classifier for
 
     ```R
     install.packages('devtools')
+    library(devtools)
     ```
 
 1. (optional) Install via local git repo.
@@ -85,4 +86,4 @@ Because the `gt_labels.csv` and `model.Rdata` files contain patient derived and 
 
 `classify_series()`
 
-To predict new/unknown cases, we can just load up and apply our pre-trained model. This file provides an example command line interface.
+This function will apply our pre-trained model to predict new/unknown cases.
