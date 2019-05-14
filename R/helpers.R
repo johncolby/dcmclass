@@ -1,7 +1,7 @@
 #' Get DICOM header
-#' 
+#'
 #' Extract a single representative DICOM header from a given series.
-#' 
+#'
 #' @param path String. Directory path to a study series (which should contain DICOM files).
 #' @param field_names Char vector. Set of DICOM header fields to extract.
 #' @keywords internal
@@ -15,8 +15,8 @@ get_hdr <- function(path, field_names){
 #' Load study headers
 #'
 #' Load representative headers from each series in a set of multiple studies
-#' 
-#' @param acc_dirs Char vector. Directory paths, whose basenames should be 
+#'
+#' @param acc_dirs Char vector. Directory paths, whose basenames should be
 #' accession numbers, and whose contents should be study directories.
 #' @param field_names Char vector. Set of DICOM header fields to extract.
 #' @keywords internal
@@ -33,7 +33,7 @@ load_study_headers <- function(acc_dirs, field_names) {
     # Handle missing values
     mutate_if(is_character, replace_na, replace='EMPTY') %>%
     mutate_if(~is_integer(.) || is_double(.), list(na=is.na)) %>%
-    mutate_all(replace_na, replace=0) %>% 
+    mutate_all(replace_na, replace=0) %>%
     # Arrange table
     select(AccessionNumber, SeriesNumber, everything()) %>%
     arrange(AccessionNumber, SeriesNumber)
@@ -123,9 +123,9 @@ preprocess_headers <- function(tb, num_fields=NULL, fct_fields=NULL, char_fields
 }
 
 #' Predict DICOM headers
-#' 
+#'
 #' Function to predict series classification of a bunch of headers
-#' 
+#'
 #' @param acc_dir String. Directory path to unknown study to be classified.
 #' @param models List. Pretrained model(s).
 #' @param ref Reference preprocessed training data.

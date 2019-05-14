@@ -1,8 +1,8 @@
 #' Train model
-#' 
-#' Train a model to identify modality (e.g axial FLAIR, T1, T1CE) based on 
+#'
+#' Train a model to identify modality (e.g axial FLAIR, T1, T1CE) based on
 #' DICOM header data.
-#' 
+#'
 #' @param dcm_dir String. Directory path to training set, organized like:
 #' studies/series/dicoms.
 #' @param gt_labels_path String. File path to ground truth labels file \code{gt_labels.csv}.
@@ -11,7 +11,7 @@
 #' @param repeats Number of repeats for repeated cross validation.
 #' @export
 
-train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata', 
+train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata',
   n_cv = 5, repeats = 5) {
 num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
   'MagneticFieldStrength', 'SpacingBetweenSlices', 'FlipAngle',
@@ -48,7 +48,7 @@ char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')
                                    sampling   = 'down')
 
   train_wrapper <- function(method){
-    caret::train(train_data, tb$class, method     = method, 
+    caret::train(train_data, tb$class, method     = method,
                                        preProcess = pre_process,
                                        trControl  = tr_control)
   }
@@ -56,9 +56,9 @@ char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')
   models = map(c('xgbTree'), train_wrapper)
 
   if(!is_null(save_path)) {
-    save(tb, 
-         tb_preproc, 
-         models, 
+    save(tb,
+         tb_preproc,
+         models,
          file=save_path)
   }
 
