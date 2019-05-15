@@ -3,31 +3,52 @@
 #' Train a model to identify modality (e.g axial FLAIR, T1, T1CE) based on
 #' DICOM header data.
 #'
+#' Default values:
+#' \itemize{
+#' \item \code{num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
+#'  'MagneticFieldStrength', 'SpacingBetweenSlices', 'FlipAngle',
+#'  'ImagesInAcquisition', 'Rows', 'Columns')}
+#' \item \code{fct_fields = c('CodeValue', 'MRAcquisitionType', 'ScanningSequence',
+#'  'StationName', 'VariableFlipAngleFlag')}
+#' \item \code{char_fields = c('SeriesDescription', 'ScanOptions')}
+#' \item \code{char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')}
+#' }
+#'
 #' @param dcm_dir String. Directory path to training set, organized like:
 #' studies/series/dicoms.
 #' @param gt_labels_path String. File path to ground truth labels file \code{gt_labels.csv}.
 #' @param save_path String or NULL. (Optional) File path to save trained model as a \code{.Rdata} file.
 #' @param n_cv Number of cross validation folds for model training.
 #' @param repeats Number of repeats for repeated cross validation.
+#' @inheritParams preprocess_headers
 #' @export
 
-train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata',
-  n_cv = 5, repeats = 5) {
-num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
+train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata', n_cv
+  = 5, repeats = 5, num_fields = NULL, fct_fields = NULL, char_fields = NULL,
+  char_splitters = NULL) {
+  if(is_null(num_fields)) {
+    num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
   'MagneticFieldStrength', 'SpacingBetweenSlices', 'FlipAngle',
   'ImagesInAcquisition', 'Rows', 'Columns')
-fct_fields = c('CodeValue', 'MRAcquisitionType', 'ScanningSequence',
+  }
+  if(is_null(fct_fields)) {
+    fct_fields = c('CodeValue', 'MRAcquisitionType', 'ScanningSequence',
   'StationName', 'VariableFlipAngleFlag')
-char_fields = c('SeriesDescription', 'ScanOptions')
-char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')
+  }
+  if(is_null(char_fields)) {
+  char_fields = c('SeriesDescription', 'ScanOptions')
+  char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')
+  }
 
   # Load hand-labeled series classification
   gt_labels = readr::read_csv(gt_labels_path, col_types = 'ciiii') %>%
     gather(select=-AccessionNumber, key='class', value='SeriesNumber')
 
   # Construct training dataset
+  field_names = list(num_fields, fct_fields, char_fields)
+  field_names = unlist(field_names[!map_lgl(field_names, is_false)])
   tb_tmp = file.path(dcm_dir, unique(gt_labels$AccessionNumber)) %>%
-    load_study_headers(field_names=c(num_fields, fct_fields, char_fields))
+    load_study_headers(field_names=field_names)
   tb = tb_tmp %>%
     left_join(gt_labels, by=c('AccessionNumber', 'SeriesNumber')) %>%
     mutate(class = replace_na(class, replace='other'),

@@ -4,19 +4,19 @@
 \alias{preprocess_headers}
 \title{Preprocess training DICOM headers}
 \usage{
-preprocess_headers(tb, num_fields = NULL, fct_fields = NULL,
-  char_fields = NULL, char_splitters = NULL, ref = NULL)
+preprocess_headers(tb, num_fields, fct_fields = FALSE,
+  char_fields = FALSE, char_splitters = NULL, ref = NULL)
 }
 \arguments{
 \item{tb}{Dataframe with training set header data.}
 
-\item{num_fields}{Char vector. Names of numeric fields.}
+\item{num_fields}{Char vector. Names of numeric fields. Should at least contain \code{SeriesNumber}.}
 
-\item{fct_fields}{Char vector. Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.}
+\item{fct_fields}{Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.}
 
-\item{char_fields}{Char vector. Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).}
+\item{char_fields}{Char vector or \code{FALSE}. (Optional) Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).}
 
-\item{char_splitters}{Char vector. Regular expression splitting patterns to use for \code{char_features}.}
+\item{char_splitters}{Char vector. Regular expression splitting patterns to use for \code{char_fields}.}
 
 \item{ref}{List. (Optional) Reference training dataset as output by \code{preprocess_headers}.}
 }

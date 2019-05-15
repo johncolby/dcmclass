@@ -18,7 +18,7 @@ get_hdr <- function(path, field_names){
 #'
 #' @param acc_dirs Char vector. Directory paths, whose basenames should be
 #' accession numbers, and whose contents should be study directories.
-#' @param field_names Char vector. Set of DICOM header fields to extract.
+#' @inheritParams get_hdr
 #' @keywords internal
 load_study_headers <- function(acc_dirs, field_names) {
   tibble(AccessionNumber = acc_dirs) %>%
@@ -43,9 +43,10 @@ load_study_headers <- function(acc_dirs, field_names) {
 #'
 #' Preprocess character fields with text mining tools to generate a Document Term Matrix
 #'
-#' @param tb Dataframe with training set header data.
 #' @param field String. Character/string field to process.
 #' @param pattern String. Regular expression splitting pattern.
+#' @inheritParams preprocess_headers
+#' @keywords internal
 get_dtm <- function(tb, field, pattern) {
   tb_dtm = tb %>%
     select(series, field) %>%
@@ -62,13 +63,14 @@ get_dtm <- function(tb, field, pattern) {
 #' Preprocess header data from training set.
 #'
 #' @param tb Dataframe with training set header data.
-#' @param num_fields Char vector. Names of numeric fields.
-#' @param fct_fields Char vector. Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.
-#' @param char_fields Char vector. Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).
-#' @param char_splitters Char vector. Regular expression splitting patterns to use for \code{char_features}.
+#' @param num_fields Char vector. Names of numeric fields. Should at least contain \code{SeriesNumber}.
+#' @param fct_fields Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.
+#' @param char_fields Char vector or \code{FALSE}. (Optional) Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).
+#' @param char_splitters Char vector. Regular expression splitting patterns to use for \code{char_fields}.
 #' @param ref List. (Optional) Reference training dataset as output by \code{preprocess_headers}.
+#' @importFrom rlang is_false
 #' @keywords internal
-preprocess_headers <- function(tb, num_fields=NULL, fct_fields=NULL, char_fields=NULL, char_splitters=NULL, ref=NULL) {
+preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FALSE, char_splitters=NULL, ref=NULL) {
   if(!is_null(ref)) {
     num_fields  = ref$fields$num_fields
     fct_fields  = ref$fields$fct_fields
@@ -77,28 +79,35 @@ preprocess_headers <- function(tb, num_fields=NULL, fct_fields=NULL, char_fields
   }
 
   # Convert CHARACTER variables into document term matrix numeric variables
-  tb_dtm = map2(char_fields, char_splitters, ~get_dtm(tb, .x, .y)) %>%
-    bind_cols
-  if(!is_null(ref)) {
-    join_by = names(tb_dtm)[names(tb_dtm) %in% names(ref$tb_dtm)]
-    tb_dtm = tb_dtm %>%
-      left_join(ref$tb_dtm[0,], by=join_by) %>%
-      select(names(ref$tb_dtm)) %>%
-      mutate_all(replace_na, replace=0)
+  tb_dtm = select(tb)
+  if(!is_false(char_fields)) {
+    tb_dtm = map2(char_fields, char_splitters, ~get_dtm(tb, .x, .y)) %>%
+      bind_cols
+    if(!is_null(ref)) {
+      join_by = names(tb_dtm)[names(tb_dtm) %in% names(ref$tb_dtm)]
+      tb_dtm = tb_dtm %>%
+        left_join(ref$tb_dtm[0,], by=join_by) %>%
+        select(names(ref$tb_dtm)) %>%
+        mutate_all(replace_na, replace=0)
+    }
   }
 
   # Convert FACTOR variables into dummy encoded numeric variables
-  tb_fct_tmp = tb %>%
-    select(fct_fields) %>%
-    mutate_all(as.factor)
-  if(!is_null(ref)) {
-    tb_fct_tmp = tb_fct_tmp %>%
-      map2(ref$tb_fct_tmp, ~factor(.x, levels=levels(.y))) %>%
+  tb_fct     = select(tb)
+  tb_fct_tmp = select(tb)
+  if(!is_false(fct_fields)) {
+    tb_fct_tmp = tb %>%
+      select(fct_fields) %>%
+      mutate_all(as.factor)
+    if(!is_null(ref)) {
+      tb_fct_tmp = tb_fct_tmp %>%
+        map2(ref$tb_fct_tmp, ~factor(.x, levels=levels(.y))) %>%
+        as_tibble
+    }
+    tb_fct = tb_fct_tmp %>%
+      stats::predict(caret::dummyVars(stats::formula(~ .) , data=.), newdata=.) %>%
       as_tibble
   }
-  tb_fct = tb_fct_tmp %>%
-    stats::predict(caret::dummyVars(stats::formula(~ .) , data=.), newdata=.) %>%
-    as_tibble
 
   # Select NUMERIC training variables
   tb_num = tb %>%

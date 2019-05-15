@@ -5,7 +5,8 @@
 \title{Train model}
 \usage{
 train_model(dcm_dir, gt_labels_path, save_path = "model.Rdata",
-  n_cv = 5, repeats = 5)
+  n_cv = 5, repeats = 5, num_fields = NULL, fct_fields = NULL,
+  char_fields = NULL, char_splitters = NULL)
 }
 \arguments{
 \item{dcm_dir}{String. Directory path to training set, organized like:
@@ -18,8 +19,28 @@ studies/series/dicoms.}
 \item{n_cv}{Number of cross validation folds for model training.}
 
 \item{repeats}{Number of repeats for repeated cross validation.}
+
+\item{num_fields}{Char vector. Names of numeric fields. Should at least contain \code{SeriesNumber}.}
+
+\item{fct_fields}{Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.}
+
+\item{char_fields}{Char vector or \code{FALSE}. (Optional) Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).}
+
+\item{char_splitters}{Char vector. Regular expression splitting patterns to use for \code{char_fields}.}
 }
 \description{
 Train a model to identify modality (e.g axial FLAIR, T1, T1CE) based on
 DICOM header data.
+}
+\details{
+Default values:
+\itemize{
+\item \code{num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
+ 'MagneticFieldStrength', 'SpacingBetweenSlices', 'FlipAngle',
+ 'ImagesInAcquisition', 'Rows', 'Columns')}
+\item \code{fct_fields = c('CodeValue', 'MRAcquisitionType', 'ScanningSequence',
+ 'StationName', 'VariableFlipAngleFlag')}
+\item \code{char_fields = c('SeriesDescription', 'ScanOptions')}
+\item \code{char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')}
+}
 }

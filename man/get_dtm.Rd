@@ -16,3 +16,4 @@ get_dtm(tb, field, pattern)
 \description{
 Preprocess character fields with text mining tools to generate a Document Term Matrix
 }
+\keyword{internal}
