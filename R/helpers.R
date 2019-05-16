@@ -16,6 +16,9 @@ get_hdr <- function(path, field_names){
 #'
 #' Load representative headers from each series in a set of multiple studies
 #'
+#' \code{NA} are dummy coded as additional variables, as their presence/absence
+#' may provide useful information for classification
+#'
 #' @param acc_dirs Char vector. Directory paths, whose basenames should be
 #' accession numbers, and whose contents should be study directories.
 #' @inheritParams get_hdr
@@ -41,7 +44,8 @@ load_study_headers <- function(acc_dirs, field_names) {
 
 #' Generate Document Term Matrix
 #'
-#' Preprocess character fields with text mining tools to generate a Document Term Matrix
+#' Preprocess character fields with text mining tools to generate a Document
+#' Term Matrix
 #'
 #' @param field String. Character/string field to process.
 #' @param pattern String. Regular expression splitting pattern.
@@ -64,7 +68,7 @@ get_dtm <- function(tb, field, pattern) {
 #'
 #' @param tb Dataframe with training set header data.
 #' @param num_fields Char vector. Names of numeric fields. Should at least contain \code{SeriesNumber}.
-#' @param fct_fields Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.
+#' @param fct_fields Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into multiple one-hot i.e. dummy encoded variables.
 #' @param char_fields Char vector or \code{FALSE}. (Optional) Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).
 #' @param char_splitters Char vector. Regular expression splitting patterns to use for \code{char_fields}.
 #' @param ref List. (Optional) Reference training dataset as output by \code{preprocess_headers}.
@@ -72,6 +76,7 @@ get_dtm <- function(tb, field, pattern) {
 #' @keywords internal
 preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FALSE, char_splitters=NULL, ref=NULL) {
   if(!is_null(ref)) {
+    # Use same fields as training set
     num_fields  = ref$fields$num_fields
     fct_fields  = ref$fields$fct_fields
     char_fields = ref$fields$char_fields
@@ -84,6 +89,7 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
     tb_dtm = map2(char_fields, char_splitters, ~get_dtm(tb, .x, .y)) %>%
       bind_cols
     if(!is_null(ref)) {
+      # Add terms to match training set
       join_by = names(tb_dtm)[names(tb_dtm) %in% names(ref$tb_dtm)]
       tb_dtm = tb_dtm %>%
         left_join(ref$tb_dtm[0,], by=join_by) %>%
@@ -99,8 +105,8 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
     tb_fct_tmp = tb %>%
       select(fct_fields) %>%
       mutate_all(as.factor)
-    # Add levels to match training set
     if(!is_null(ref)) {
+      # Add levels to match training set
       tb_fct_tmp = tb_fct_tmp %>%
         map2(ref$tb_fct_tmp, ~factor(.x, levels=levels(.y))) %>%
         as_tibble
@@ -119,6 +125,7 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
   # Compile character, factor, and numeric training variables
   tb_preproc = bind_cols(tb_dtm, tb_fct, tb_num)
   if(is_null(ref)) {
+    # If training mode, return extra info need to match preprocessing at testing
     tb_preproc = tb_preproc %>%
       select(-caret::findLinearCombos(.)$remove) %>%
       as_tibble
@@ -128,6 +135,7 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
                 fields     = list(num_fields=num_fields, fct_fields=fct_fields, char_fields=char_fields),
                 char_splitters = char_splitters))
   } else {
+    # If testing mode, just return the preprocessed data
     tb_preproc %>%
       select(colnames(ref$tb_preproc)) %>%
       as_tibble
@@ -142,6 +150,7 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
 #' @param models List. Pretrained model(s).
 #' @param ref Reference preprocessed training data.
 #' @export
+#' @family main functions
 predict_headers <-function(acc_dir, models, ref) {
   tb = load_study_headers(acc_dir, unlist(ref$fields))
   tb_preproc = preprocess_headers(tb, ref=ref)

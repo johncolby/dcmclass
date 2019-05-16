@@ -18,3 +18,8 @@ import_studies(accs, dcm_dir, cred_path, air_url)
 \description{
 Download a representative DICOM file from each series in a set of studies.
 }
+\seealso{
+Other main functions: \code{\link{predict_headers}},
+  \code{\link{train_model}}
+}
+\concept{main functions}

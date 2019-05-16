@@ -12,7 +12,7 @@ preprocess_headers(tb, num_fields, fct_fields = FALSE,
 
 \item{num_fields}{Char vector. Names of numeric fields. Should at least contain \code{SeriesNumber}.}
 
-\item{fct_fields}{Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.}
+\item{fct_fields}{Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into multiple one-hot i.e. dummy encoded variables.}
 
 \item{char_fields}{Char vector or \code{FALSE}. (Optional) Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).}
 

@@ -15,17 +15,19 @@
 #' }
 #'
 #' @param dcm_dir String. Directory path to training set, organized like:
-#' studies/series/dicoms.
+#' accessions/studies/series/dicoms.
 #' @param gt_labels_path String. File path to ground truth labels file \code{gt_labels.csv}.
-#' @param save_path String or NULL. (Optional) File path to save trained model as a \code{.Rdata} file.
+#' @param save_path String or FALSE. (Optional) File path to save trained model as a \code{.Rdata} file.
 #' @param n_cv Number of cross validation folds for model training.
 #' @param repeats Number of repeats for repeated cross validation.
 #' @inheritParams preprocess_headers
 #' @export
+#' @family main functions
 
 train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata', n_cv
   = 5, repeats = 5, num_fields = NULL, fct_fields = NULL, char_fields = NULL,
   char_splitters = NULL) {
+  # Default DICOM fields for processing
   if(is_null(num_fields)) {
     num_fields = c('SeriesNumber', 'SliceThickness', 'RepetitionTime', 'EchoTime',
   'MagneticFieldStrength', 'SpacingBetweenSlices', 'FlipAngle',
@@ -76,7 +78,7 @@ train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata', n_cv
 
   models = map(c('xgbTree'), train_wrapper)
 
-  if(!is_null(save_path)) {
+  if(!is_false(save_path)) {
     save(tb,
          tb_preproc,
          models,

@@ -1,12 +1,13 @@
 #' Import DICOM studies
-#' 
+#'
 #' Download a representative DICOM file from each series in a set of studies.
-#' 
+#'
 #' @param accs Character vector. Accession numbers to download.
 #' @param cred_path String. File path to air_login.txt (for \code{air_download}).
 #' @param air_url String. URL for AIR API.
 #' @param dcm_dir String. Directory path for output.
 #' @export
+#' @family main functions
 
 import_studies <- function(accs, dcm_dir, cred_path, air_url) {
 

@@ -15,4 +15,8 @@ accession numbers, and whose contents should be study directories.}
 \description{
 Load representative headers from each series in a set of multiple studies
 }
+\details{
+\code{NA} are dummy coded as additional variables, as their presence/absence
+may provide useful information for classification
+}
 \keyword{internal}

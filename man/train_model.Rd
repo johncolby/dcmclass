@@ -10,11 +10,11 @@ train_model(dcm_dir, gt_labels_path, save_path = "model.Rdata",
 }
 \arguments{
 \item{dcm_dir}{String. Directory path to training set, organized like:
-studies/series/dicoms.}
+accessions/studies/series/dicoms.}
 
 \item{gt_labels_path}{String. File path to ground truth labels file \code{gt_labels.csv}.}
 
-\item{save_path}{String or NULL. (Optional) File path to save trained model as a \code{.Rdata} file.}
+\item{save_path}{String or FALSE. (Optional) File path to save trained model as a \code{.Rdata} file.}
 
 \item{n_cv}{Number of cross validation folds for model training.}
 
@@ -22,7 +22,7 @@ studies/series/dicoms.}
 
 \item{num_fields}{Char vector. Names of numeric fields. Should at least contain \code{SeriesNumber}.}
 
-\item{fct_fields}{Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into one-hot i.e. dummy encoded variables.}
+\item{fct_fields}{Char vector or \code{FALSE}. (Optional) Names of factor/categorical fields. These will be preprocessed into multiple one-hot i.e. dummy encoded variables.}
 
 \item{char_fields}{Char vector or \code{FALSE}. (Optional) Names of character/string fields. These will be preprocessed with basic text mining methods into a set of variables representing the document term matrix (i.e. word frequency histograms).}
 
@@ -44,3 +44,8 @@ Default values:
 \item \code{char_splitters = c('[[:punct:][:space:]]+', '[:space:]+')}
 }
 }
+\seealso{
+Other main functions: \code{\link{import_studies}},
+  \code{\link{predict_headers}}
+}
+\concept{main functions}

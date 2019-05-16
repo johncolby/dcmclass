@@ -14,6 +14,7 @@ get_dtm(tb, field, pattern)
 \item{pattern}{String. Regular expression splitting pattern.}
 }
 \description{
-Preprocess character fields with text mining tools to generate a Document Term Matrix
+Preprocess character fields with text mining tools to generate a Document
+Term Matrix
 }
 \keyword{internal}
