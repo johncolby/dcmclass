@@ -99,12 +99,15 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
     tb_fct_tmp = tb %>%
       select(fct_fields) %>%
       mutate_all(as.factor)
+    # Add levels to match training set
     if(!is_null(ref)) {
       tb_fct_tmp = tb_fct_tmp %>%
         map2(ref$tb_fct_tmp, ~factor(.x, levels=levels(.y))) %>%
         as_tibble
     }
+    # Generate dummy variables
     tb_fct = tb_fct_tmp %>%
+      select_if(~ length(levels(.)) > 1) %>%
       stats::predict(caret::dummyVars(stats::formula(~ .) , data=.), newdata=.) %>%
       as_tibble
   }
