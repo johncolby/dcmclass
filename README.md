@@ -84,6 +84,6 @@ Because the `gt_labels.csv` and `model.Rdata` files contain patient derived and 
 
 ### Predict new cases
 
-`classify_series()`
+`predict_headers()`
 
 This function will apply our pre-trained model to predict new/unknown cases.
