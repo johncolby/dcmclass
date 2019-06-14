@@ -22,15 +22,15 @@ get_hdr <- function(path, field_names){
 #' @param acc_dirs Char vector. Directory paths, whose basenames should be
 #' accession numbers, and whose contents should be study directories.
 #' @inheritParams get_hdr
-#' @keywords internal
+#' @export
 load_study_headers <- function(acc_dirs, field_names) {
   tibble(AccessionNumber = acc_dirs) %>%
-    mutate(series = map(AccessionNumber, ~list.files(list.dirs(., recursive=FALSE), full.names=TRUE)),
+    mutate(path = map(AccessionNumber, ~list.files(list.dirs(., recursive=FALSE), full.names=TRUE)),
            AccessionNumber = as.character(basename(AccessionNumber))) %>%
     unnest %>%
     # Load DICOM header data
-    mutate(hdr = map(series, get_hdr, field_names=field_names),
-           series = basename(series)) %>%
+    mutate(hdr = map(path, get_hdr, field_names=field_names),
+           series = basename(path)) %>%
     unnest %>%
     spread(key='name', value='value', convert=TRUE) %>%
     # Handle missing values

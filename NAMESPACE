@@ -2,6 +2,7 @@
 
 export(contr.ltfr)
 export(import_studies)
+export(load_study_headers)
 export(predict_headers)
 export(train_model)
 import(dplyr)
