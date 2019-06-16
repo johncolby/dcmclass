@@ -24,7 +24,7 @@ test_that("load study", {
   Sys.setlocale('LC_ALL', 'C')
   on.exit(Sys.setlocale("LC_CTYPE", ""))
   expect_s3_class(tb, 'tbl_df')
-  expect_known_hash(tb, '9462959fdb')
+  expect_known_hash(tb, 'aecf03b6f8')
 })
 
 test_that("generate TDM", {
