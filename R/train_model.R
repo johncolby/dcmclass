@@ -44,7 +44,7 @@ train_model <- function(dcm_dir, gt_labels_path, save_path = 'model.Rdata', n_cv
 
   # Load hand-labeled series classification
   gt_labels = readr::read_csv(gt_labels_path, col_types = 'ciiii') %>%
-    gather(select=-AccessionNumber, key='class', value='SeriesNumber')
+    gather(-AccessionNumber, key='class', value='SeriesNumber')
 
   # Construct training dataset
   field_names = list(num_fields, fct_fields, char_fields)

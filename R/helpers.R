@@ -27,11 +27,11 @@ load_study_headers <- function(acc_dirs, field_names) {
   tibble(AccessionNumber = acc_dirs) %>%
     mutate(path = map(AccessionNumber, ~list.files(list.dirs(., recursive=FALSE), full.names=TRUE)),
            AccessionNumber = as.character(basename(AccessionNumber))) %>%
-    unnest %>%
+    unnest(path) %>%
     # Load DICOM header data
     mutate(hdr = map(path, get_hdr, field_names=field_names),
            series = basename(path)) %>%
-    unnest %>%
+    unnest(hdr) %>%
     spread(key='name', value='value', convert=TRUE) %>%
     # Handle missing values
     mutate_if(is_character, replace_na, replace='EMPTY') %>%
@@ -160,10 +160,10 @@ predict_headers <-function(acc_dir, models, ref) {
     group_by(object) %>%
     nest %>%
     mutate(data=map(data, tibble::rowid_to_column)) %>%
-    unnest %>%
+    unnest(data) %>%
     group_by(rowid) %>%
     summarize_if(is.numeric, mean) %>%
-    gather(select=-rowid, key='class', value='prob') %>%
+    gather(-rowid, key='class', value='prob') %>%
     group_by(class) %>%
     top_n(n=1, wt=prob) %>%
     mutate(SeriesNumber = tb$SeriesNumber[rowid],
