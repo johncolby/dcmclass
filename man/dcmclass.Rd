@@ -3,7 +3,6 @@
 \docType{package}
 \name{dcmclass}
 \alias{dcmclass}
-\alias{dcmclass-package}
 \title{\code{dcmclass} package}
 \description{
 Tools for identifying imaging modality based on DICOM header data

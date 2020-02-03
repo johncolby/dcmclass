@@ -4,9 +4,17 @@
 \alias{train_model}
 \title{Train model}
 \usage{
-train_model(dcm_dir, gt_labels_path, save_path = "model.Rdata",
-  n_cv = 5, repeats = 5, num_fields = NULL, fct_fields = NULL,
-  char_fields = NULL, char_splitters = NULL)
+train_model(
+  dcm_dir,
+  gt_labels_path,
+  save_path = "model.Rdata",
+  n_cv = 5,
+  repeats = 5,
+  num_fields = NULL,
+  fct_fields = NULL,
+  char_fields = NULL,
+  char_splitters = NULL
+)
 }
 \arguments{
 \item{dcm_dir}{String. Directory path to training set, organized like:
@@ -45,7 +53,8 @@ Default values:
 }
 }
 \seealso{
-Other main functions: \code{\link{import_studies}},
-  \code{\link{predict_headers}}
+Other main functions: 
+\code{\link{import_studies}()},
+\code{\link{predict_headers}()}
 }
 \concept{main functions}

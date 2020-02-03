@@ -17,7 +17,8 @@ predict_headers(acc_dir, models, ref)
 Function to predict series classification of a bunch of headers
 }
 \seealso{
-Other main functions: \code{\link{import_studies}},
-  \code{\link{train_model}}
+Other main functions: 
+\code{\link{import_studies}()},
+\code{\link{train_model}()}
 }
 \concept{main functions}

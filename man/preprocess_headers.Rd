@@ -4,8 +4,14 @@
 \alias{preprocess_headers}
 \title{Preprocess training DICOM headers}
 \usage{
-preprocess_headers(tb, num_fields, fct_fields = FALSE,
-  char_fields = FALSE, char_splitters = NULL, ref = NULL)
+preprocess_headers(
+  tb,
+  num_fields,
+  fct_fields = FALSE,
+  char_fields = FALSE,
+  char_splitters = NULL,
+  ref = NULL
+)
 }
 \arguments{
 \item{tb}{Dataframe with training set header data.}
