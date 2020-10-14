@@ -7,7 +7,10 @@ Authors@R:
            role = c("aut", "cre"),
            email = "john.b.colby@gmail.com",
            comment = c(ORCID = "0000-0001-8816-711X"))
-Description: What the package does (one paragraph).
+Description: Reads in DICOM data and tries to parse modality and sequence 
+    from medical imaging data.  This classification allows for separation of
+    images into folders and allows researchers to focus on the target image
+    sequence as many are not of interest.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -25,6 +28,6 @@ Imports:
     caret,
     glue,
     xgboost
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Suggests: 
     testthat (>= 2.1.0)

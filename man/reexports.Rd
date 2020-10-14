@@ -11,6 +11,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{caret}{\code{\link[caret]{contr.ltfr}}}
+  \item{caret}{\code{\link[caret:dummyVars]{contr.ltfr}}}
 }}
 

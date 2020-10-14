@@ -6,10 +6,12 @@
 #' @param field_names Char vector. Set of DICOM header fields to extract.
 #' @keywords internal
 get_hdr <- function(path, field_names){
-  as_tibble(oro.dicom::readDICOMFile(list.files(path, full.names = TRUE)[1], skipSequence=TRUE, pixelData = FALSE)$hdr) %>%
-    select(name, value) %>%
-    filter(name %in% field_names) %>%
-    distinct(name, .keep_all = TRUE)
+  tibble::as_tibble(
+    oro.dicom::readDICOMFile(list.files(path, full.names = TRUE)[1],
+                             skipSequence=TRUE, pixelData = FALSE)$hdr) %>%
+    dplyr::select(name, value) %>%
+    dplyr::filter(name %in% field_names) %>%
+    dplyr::distinct(name, .keep_all = TRUE)
 }
 
 #' Load study headers
@@ -24,22 +26,24 @@ get_hdr <- function(path, field_names){
 #' @inheritParams get_hdr
 #' @export
 load_study_headers <- function(acc_dirs, field_names) {
-  tibble(AccessionNumber = acc_dirs) %>%
-    mutate(path = map(AccessionNumber, ~list.files(list.dirs(., recursive=FALSE), full.names=TRUE)),
-           AccessionNumber = as.character(basename(AccessionNumber))) %>%
-    unnest(path) %>%
+  tibble::tibble(AccessionNumber = acc_dirs) %>%
+    dplyr::mutate(
+      path = purrr::map(AccessionNumber,
+                        ~list.files(list.dirs(., recursive=FALSE), full.names=TRUE)),
+      AccessionNumber = as.character(basename(AccessionNumber))) %>%
+    tidyr::unnest(path) %>%
     # Load DICOM header data
-    mutate(hdr = map(path, get_hdr, field_names=field_names),
-           series = basename(path)) %>%
-    unnest(hdr) %>%
-    spread(key='name', value='value', convert=TRUE) %>%
+    dplyr::mutate(hdr = map(path, get_hdr, field_names=field_names),
+                  series = basename(path)) %>%
+    tidyr::unnest(hdr) %>%
+    tidyr::spread(key='name', value='value', convert=TRUE) %>%
     # Handle missing values
-    mutate_if(is_character, replace_na, replace='EMPTY') %>%
-    mutate_if(~is_integer(.) || is_double(.), list(na=is.na)) %>%
-    mutate_all(replace_na, replace=0) %>%
+    dplyr::mutate_if(is_character, replace_na, replace='EMPTY') %>%
+    dplyr::mutate_if(~is_integer(.) || is_double(.), list(na=is.na)) %>%
+    dplyr::mutate_all(replace_na, replace=0) %>%
     # Arrange table
-    select(AccessionNumber, SeriesNumber, everything()) %>%
-    arrange(AccessionNumber, SeriesNumber)
+    dplyr::select(AccessionNumber, SeriesNumber, everything()) %>%
+    dplyr::arrange(AccessionNumber, SeriesNumber)
 }
 
 #' Generate Document Term Matrix
@@ -52,11 +56,13 @@ load_study_headers <- function(acc_dirs, field_names) {
 #' @inheritParams preprocess_headers
 #' @keywords internal
 get_dtm <- function(tb, field, pattern) {
+  n = series = field = word = NULL
+  rm(list=c("series", "field", "word", "n"))
   tb_dtm = tb %>%
-    select(series, field) %>%
+    dplyr::select(series, field) %>%
     tidytext::unnest_tokens(word, !!field, token=stringr::str_split, pattern=pattern) %>%
-    filter(!stringr::str_detect(word, '^[:digit:]+$')) %>% # remove number tokens
-    count(series, word) %>%
+    dplyr::filter(!stringr::str_detect(word, '^[:digit:]+$')) %>% # remove number tokens
+    dplyr::count(series, word) %>%
     tidytext::cast_dtm(document=series, term=word, value=n) %>%
     tm::removeSparseTerms(sparse=0.99)
   return(as_tibble(data.frame(as.matrix(tb_dtm[tb$series, ]))))
@@ -75,7 +81,7 @@ get_dtm <- function(tb, field, pattern) {
 #' @importFrom rlang is_false
 #' @keywords internal
 preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FALSE, char_splitters=NULL, ref=NULL) {
-  if(!is_null(ref)) {
+  if(!rlang::is_null(ref)) {
     # Use same fields as training set
     num_fields  = ref$fields$num_fields
     fct_fields  = ref$fields$fct_fields
@@ -84,51 +90,51 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
   }
 
   # Convert CHARACTER variables into document term matrix numeric variables
-  tb_dtm = select(tb)
+  tb_dtm = dplyr::select(tb)
   if(!is_false(char_fields)) {
-    tb_dtm = map2(char_fields, char_splitters, ~get_dtm(tb, .x, .y)) %>%
-      bind_cols
-    if(!is_null(ref)) {
+    tb_dtm = purrr::map2(char_fields, char_splitters, ~get_dtm(tb, .x, .y)) %>%
+      dplyr::bind_cols
+    if(!rlang::is_null(ref)) {
       # Add terms to match training set
       join_by = names(tb_dtm)[names(tb_dtm) %in% names(ref$tb_dtm)]
       tb_dtm = tb_dtm %>%
-        left_join(ref$tb_dtm[0,], by=join_by) %>%
-        select(names(ref$tb_dtm)) %>%
-        mutate_all(replace_na, replace=0)
+        dplyr::left_join(ref$tb_dtm[0,], by=join_by) %>%
+        dplyr::select(names(ref$tb_dtm)) %>%
+        dplyr::mutate_all(tidyr::replace_na, replace=0)
     }
   }
 
   # Convert FACTOR variables into dummy encoded numeric variables
-  tb_fct     = select(tb)
-  tb_fct_tmp = select(tb)
+  tb_fct     = dplyr::select(tb)
+  tb_fct_tmp = dplyr::select(tb)
   if(!is_false(fct_fields)) {
     tb_fct_tmp = tb %>%
-      select(fct_fields) %>%
-      mutate_all(as.factor)
-    if(!is_null(ref)) {
+      dplyr::select(fct_fields) %>%
+      dplyr::mutate_all(as.factor)
+    if(!rlang::is_null(ref)) {
       # Add levels to match training set
       tb_fct_tmp = tb_fct_tmp %>%
-        map2(ref$tb_fct_tmp, ~factor(.x, levels=levels(.y))) %>%
-        as_tibble
+        purrr::map2(ref$tb_fct_tmp, ~factor(.x, levels=levels(.y))) %>%
+        tibble::as_tibble
     }
     # Generate dummy variables
     tb_fct = tb_fct_tmp %>%
-      select_if(~ length(levels(.)) > 1) %>%
+      dplyr::select_if(~ length(levels(.)) > 1) %>%
       stats::predict(caret::dummyVars(stats::formula(~ .) , data=.), newdata=.) %>%
-      as_tibble
+      tibble::as_tibble
   }
 
   # Select NUMERIC training variables
   tb_num = tb %>%
-    select(num_fields)
+    dplyr::select(num_fields)
 
   # Compile character, factor, and numeric training variables
-  tb_preproc = bind_cols(tb_dtm, tb_fct, tb_num)
-  if(is_null(ref)) {
+  tb_preproc = dplyr::bind_cols(tb_dtm, tb_fct, tb_num)
+  if(rlang::is_null(ref)) {
     # If training mode, return extra info need to match preprocessing at testing
     tb_preproc = tb_preproc %>%
-      select(-caret::findLinearCombos(.)$remove) %>%
-      as_tibble
+      dplyr::select(-caret::findLinearCombos(.)$remove) %>%
+      tibble::as_tibble
     return(list(tb_preproc = tb_preproc,
                 tb_dtm     = tb_dtm,
                 tb_fct_tmp = tb_fct_tmp,
@@ -137,8 +143,8 @@ preprocess_headers <- function(tb, num_fields, fct_fields=FALSE, char_fields=FAL
   } else {
     # If testing mode, just return the preprocessed data
     tb_preproc %>%
-      select(colnames(ref$tb_preproc)) %>%
-      as_tibble
+      dplyr::select(colnames(ref$tb_preproc)) %>%
+      tibble::as_tibble
   }
 }
 
@@ -156,20 +162,21 @@ predict_headers <-function(acc_dir, models, ref) {
   tb_preproc = preprocess_headers(tb, ref=ref)
 
   caret::extractProb(models, unkX = data.frame(tb_preproc)) %>%
-    select(flair, t1, t1ce, t2, object) %>%
-    group_by(object) %>%
-    nest %>%
-    mutate(data=map(data, tibble::rowid_to_column)) %>%
-    unnest(data) %>%
-    group_by(rowid) %>%
-    summarize_if(is.numeric, mean) %>%
-    gather(-rowid, key='class', value='prob') %>%
-    group_by(class) %>%
-    top_n(n=1, wt=prob) %>%
-    mutate(SeriesNumber = tb$SeriesNumber[rowid],
-           rowid = NULL) %>%
-    distinct(class, .keep_all=TRUE) %>%
-    left_join(select(tb, SeriesNumber, series), by='SeriesNumber')
+    dplyr::select(flair, t1, t1ce, t2, object) %>%
+    dplyr::group_by(object) %>%
+    tidyr::nest %>%
+    dplyr::mutate(data=map(data, tibble::rowid_to_column)) %>%
+    tidyr::unnest(data) %>%
+    dplyr::group_by(rowid) %>%
+    dplyr::summarize_if(is.numeric, mean) %>%
+    tidyr::gather(-rowid, key='class', value='prob') %>%
+    dplyr::group_by(class) %>%
+    dplyr::top_n(n=1, wt=prob) %>%
+    dplyr::mutate(SeriesNumber = tb$SeriesNumber[rowid],
+                  rowid = NULL) %>%
+    dplyr::distinct(class, .keep_all=TRUE) %>%
+    dplyr::left_join(
+      dplyr::select(tb, SeriesNumber, series), by='SeriesNumber')
 }
 
 #' @importFrom caret contr.ltfr
